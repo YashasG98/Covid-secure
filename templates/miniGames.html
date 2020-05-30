@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="../static/css/styles.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link href="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand" href="#">Multiplayer Game Server</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarText"
+            aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarText">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{{url_for('MiniGames')}}"><b>Play!</b></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{url_for('Profile')}}"><b>Profile</b></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{url_for('Shop')}}"><b>Secret Shop</b></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{url_for('Leaderboard')}}"><b>Leaderboard</b></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{url_for('Home', email=email)}}"><b>Logout</b></a>
+                </li>
+            </ul>
+            <span class="navbar-text">
+            </span>
+        </div>
+    </nav>
+    <div style='height: 100vh;' class="jumbotron">
+        {%if email%}
+        <h1 class="display-4">Hello, {{email}}!</h1>
+        {%endif%}
+        <p class="lead"></p>
+        <hr class="my-4">
+        <p style="margin-bottom: 10vh;">Below are the games available as of now!</p>
+        <button style="margin-bottom: 5vh;height: 7vh;width: 50%;margin-left: auto;margin-right: auto;" type="button"
+            class="btn btn-success btn-lg btn-block" onclick="window.location=`{{url_for('Waiting', game_id=1)}}`">Snake
+            'n Ladders</button>
+        <button style="margin-bottom: 5vh;height: 7vh;width: 50%;margin-left: auto;margin-right: auto;" type="button"
+            class="btn btn-success btn-lg btn-block"
+            onclick="window.location=`{{url_for('Waiting', game_id=2)}}`">Connect 4</button>
+        <button style="margin-bottom: 5vh;height: 7vh;width: 50%;margin-left: auto;margin-right: auto;" type="button"
+            class="btn btn-primary btn-lg btn-block" onclick="window.location.href = `{{ url_for('PlayerHistory')}}`">Game History</button>
+        <!-- <button style="margin-bottom: 5vh;height: 7vh;width: 50%;margin-left: auto;margin-right: auto;" type="button"
+            class="btn btn-primary btn-lg btn-block">Coming Soon</button> -->
+        <button style='margin-bottom: 5vh;height: 7vh;width: 50%;margin-left: auto;margin-right: auto;' type="button"
+            class="btn btn-danger btn-lg btn-block" onclick="window.location=`{{url_for('Index')}}`">Back</button>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>
