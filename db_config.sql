@@ -10,6 +10,8 @@ create table User_Profile (
 	lastName varchar(30),
 	homeLat float(53),
 	homeLong float(53),
+	flag int(1),
+	flagged_at timestamp,
 	primary key (UserID)
 );
 
@@ -21,6 +23,7 @@ create table Login_Credentials (
 );
 
 create table Last_Location (
+	LocationID int(11),
 	UserID varchar(32),
 	lastLat float(53),
 	lastLong float(53),

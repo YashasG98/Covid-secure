@@ -7,11 +7,13 @@ app.config.from_object('config.Config')
 
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'password'     #change this password to your MySQL password for root@localhost 
+app.config['MYSQL_PASSWORD'] = 'Game_server'     #change this password to your MySQL password for root@localhost 
 app.config['MYSQL_DB'] = 'Covid_secure'
 
 mysql = MySQL(app)
 outsideDistThreshold = 0.5
+populationDensityThreshold = 2
+safety_time = 2
 
 logged_in_users =[]
 
@@ -103,33 +105,95 @@ def Index():
             currLat=stored[0][0]
             currLong=stored[0][1]
         if request.method == 'POST':
-            currLatitude = request.form['currLat']
-            currLongitude = request.form['currLong']
-            _sql = "select homeLat, homeLong from User_Profile where UserID = '{0}'"
-            cur.execute(_sql.format(email))
-            stored=cur.fetchall()
-            if calculate_dist(stored[0][0],stored[0][1],float(currLatitude), float(currLongitude))>outsideDistThreshold:
-                ts = time.time()
-                timestamp = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
-                cur.execute("INSERT INTO Last_Location(UserID,lastLat,lastLong,updated_at) VALUES(%s,%s,%s,%s)",(email,float(currLatitude),float(currLongitude),timestamp))
-                mysql.connection.commit()
-                cur.close()
-                currLat=currLatitude
-                currLong=currLongitude
+            arr = change_coordinates_and_check_density(cur, email)
+            if(arr[0] is 1):
+                currLat=arr[1]
+                currLong=arr[2]
         return render_template('index.html', email=email,currLat=currLat,currLong=currLong)
     else:
         return redirect(url_for('Login'))
 
-@app.route('/check.html')
+@app.route('/check.html', methods = ['GET', 'POST'])
 def check_location():
     check=None
     email = request.cookies.get('email')
+    flagged_users = None
+    total_users = None
     if email in logged_in_users:
-        homeLat = request.form['checkLat']
-        homeLong = request.form['checkLong']
-        return render_template('check.html', email=email)
+        if request.method == 'POST':
+            arr = find_people(float(request.form['checkLat']),float(request.form['checkLong']),float(request.form['time']))
+            flagged_users = arr[0]
+            total_users = arr[1]
+        return render_template('check.html', email=email,flagged_users= flagged_users,total_users= total_users)
     else:
         return redirect(url_for('Login'))
+
+def change_coordinates_and_check_density(cur, email):
+    currLatitude = request.form['currLat']
+    currLongitude = request.form['currLong']
+    _sql = "select homeLat, homeLong from User_Profile where UserID = '{0}'"
+    cur.execute(_sql.format(email))
+    stored=cur.fetchall()
+    if calculate_dist(stored[0][0],stored[0][1],float(currLatitude), float(currLongitude))>outsideDistThreshold:
+        ts = time.time()
+        timestamp = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
+        cur.execute("select count(*) from Last_Location")
+        id = cur.fetchall()
+        cur.execute("INSERT INTO Last_Location(LocationID,UserID,lastLat,lastLong,updated_at) VALUES(%s,%s,%s,%s,%s)",(id[0][0]+1,email,float(currLatitude),float(currLongitude),timestamp))
+        mysql.connection.commit()
+        cur.execute("SELECT UserID, MAX(LocationID) AS location_id FROM Last_Location GROUP BY UserID DESC;")
+        data = cur.fetchall()
+        areaCount = 0
+        areaUserIDs = []
+        for i in range(0,len(data)):
+            _sql = "select lastLat, lastLong, updated_at from Last_Location where LocationID = '{0}'"
+            cur.execute(_sql.format(data[i][1]))
+            stored=cur.fetchall()
+            t_new = datetime.datetime.strptime(timestamp, "%Y-%m-%d %H:%M:%S")
+            t_old = datetime.datetime.strptime(stored[0][2].strftime('%Y-%m-%d %H:%M:%S'), "%Y-%m-%d %H:%M:%S")
+            difference = t_new - t_old
+            if difference.seconds < safety_time*60*60:
+                if calculate_dist(stored[0][0],stored[0][1],float(currLatitude), float(currLongitude))<=outsideDistThreshold:
+                    areaCount+=1
+                    areaUserIDs.append(data[i][0])
+        if(areaCount>=populationDensityThreshold):
+            for i in range(0,len(areaUserIDs)):
+                _sql="update User_Profile set flag = 1 where UserID='{0}'"
+                print(_sql.format(areaUserIDs[i]))
+                cur.execute(_sql.format(areaUserIDs[i]))
+                mysql.connection.commit()
+        cur.close()
+        currLat=currLatitude
+        currLong=currLongitude
+        return [1,currLat,currLong]
+    return [0]
+
+def find_people(checkLat,checkLong,time_check):
+    cur=mysql.connection.cursor()
+    cur.execute("SELECT UserID, MAX(LocationID) AS location_id FROM Last_Location GROUP BY UserID DESC;")
+    data = cur.fetchall()
+    areaUserIDs = []
+    for i in range(0,len(data)):
+        _sql = "select lastLat, lastLong, updated_at from Last_Location where LocationID = '{0}'"
+        cur.execute(_sql.format(data[i][1]))
+        stored=cur.fetchall()
+        ts = time.time()
+        timestamp = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
+        t_new = datetime.datetime.strptime(timestamp, "%Y-%m-%d %H:%M:%S")
+        t_old = datetime.datetime.strptime(stored[0][2].strftime('%Y-%m-%d %H:%M:%S'), "%Y-%m-%d %H:%M:%S")
+        difference = t_new - t_old
+        if difference.seconds < time_check*60*60:
+            if calculate_dist(checkLat,checkLong,stored[0][0],stored[0][1])<=outsideDistThreshold:
+                areaUserIDs.append(data[i][0])
+    flaggedUsers = 0
+    for i in range(0,len(areaUserIDs)):
+        _sql="SELECT flag from User_Profile where UserID='{0}'"
+        print(_sql.format(areaUserIDs[i]))
+        cur.execute(_sql.format(areaUserIDs[i]))
+        data = cur.fetchall()   
+        if(data[0][0]==1):
+            flaggedUsers+=1
+    return [flaggedUsers,len(areaUserIDs)]
 
 
 def calculate_dist(lat_a,long_a,lat_b,long_b):
@@ -146,4 +210,4 @@ def calculate_dist(lat_a,long_a,lat_b,long_b):
     return distance
 
 if __name__ == "__main__":
-    app.run()
+    app.run(port=3000)

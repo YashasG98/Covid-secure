@@ -29,18 +29,29 @@
         </div>
     </nav>
     <div style='height: 100vh;' class="jumbotron">
-        <form>
+        <form action="/check.html" method="POST">
             <div class="form-group">
                 <label>Latitude</label>
-                <input class="form-control" id="checkLat" placeholder="Enter latitude">
+                <input class="form-control" name='checkLat' id="checkLat" placeholder="Enter latitude">
             </div>
             <div class="form-group">
                 <label>Longitude</label>
-                <input class="form-control" id="checkLong" placeholder="Enter longitude">
+                <input class="form-control" name='checkLong' id="checkLong" placeholder="Enter longitude">
+            </div>
+            <div class="form-group">
+                <label>Time Period (in hours)</label>
+                <input class="form-control" name='time' id="time" placeholder="Enter the amount of hours for which you need info">
             </div>
             <button type="submit" class="btn btn-primary">Submit</button>
         </form>
+        {% if total_users %}
+        <div class='container'>
+            <h1 class="display-4 m-4">There were {{flagged_users}} people who were in a hotspot in the last 2.5 hours in your given location.</h1>
+            <p class="lead">Also, in total, there were {{total_users}} people in the last 2.5 hours in your given location. </p>
+        </div>
+        {% endif %}
     </div>
+        
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
         integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
         crossorigin="anonymous"></script>
