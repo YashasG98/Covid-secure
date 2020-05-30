@@ -30,6 +30,8 @@ def Register():
         password=request.form['registerPassword']
         firstName = request.form['firstName']
         lastName = request.form['lastName']
+        homeLat = request.form['homeLat']
+        homeLong = request.form['homeLong']
 
         #Valid input check
         if(len(email) is 0):
@@ -49,7 +51,7 @@ def Register():
         data=cur.fetchall()
         if(len(data) is 0):
             error = None
-            cur.execute("INSERT INTO User_Profile(UserID,firstName,lastName) VALUES(%s,%s,%s)",(email,firstName,lastName))
+            cur.execute("INSERT INTO User_Profile(UserID,firstName,lastName,homeLat,homeLong) VALUES(%s,%s,%s,%s,%s)",(email,firstName,lastName,float(homeLat),float(homeLong)))
             cur.execute("INSERT INTO Login_Credentials VALUES(%s,MD5(%s))",(email,password))
             mysql.connection.commit()
             cur.close()

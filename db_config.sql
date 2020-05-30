@@ -8,6 +8,8 @@ create table User_Profile (
 	UserID varchar(32),
 	firstName varchar(30),
 	lastName varchar(30),
+	homeLat float(53),
+	homeLong float(53),
 	primary key (UserID)
 );
 
