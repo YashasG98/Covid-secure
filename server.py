@@ -1,6 +1,7 @@
 from flask import Flask,render_template,request,redirect, url_for, make_response
 from flask_mysqldb import MySQL
 import math, time, datetime
+import matplotlib.pyplot as plt
 
 app = Flask(__name__)
 app.config.from_object('config.Config')
@@ -195,6 +196,32 @@ def find_people(checkLat,checkLong,time_check):
             flaggedUsers+=1
     return [flaggedUsers,len(areaUserIDs)]
 
+def trend(lat,lng):
+    lat=float(lat)
+    lng = float(lng)
+    cur=mysql.connection.cursor()
+    _sql = "select * from last_location;"
+    cur.execute(_sql)
+    stored=cur.fetchall()
+    if len(stored)==0:
+        print("No users in past 24 hours near this location.")
+    else:
+        hour_collection = [set() for i in range(24)]
+        for user,lat1,lng1,time in stored:
+            if calculate_dist(lat1,lng1,lat,lng)< Area_considered:
+                t=(time-datetime.datetime.now()).seconds
+                if t < 24*3600:
+                    hour_collection[t//3600].add(user)
+        hour_collection = [len(i) for i in hour_collection]
+        labels = [(datetime.now() - timedelta(hours = i)).strftime('%Y-%m-%d %H:%M:%S') for i in range(24)]
+        import matplotlib.pyplot as plt
+        plt.figure(figsize=(20,5))
+        labels = [(datetime.datetime.now() - datetime.timedelta(hours = i)).strftime('%H:%M') for i in range(24)]
+        plt.plot(range(24),hour_collection)
+        plt.ylabel("Number of people")
+        plt.xlabel( "Time in past 24 hours")
+        plt.xticks(range(24),labels = labels,rotation =0)
+        plt.savefig(".\static\images\abc.jpg")
 
 def calculate_dist(lat_a,long_a,lat_b,long_b):
     R = 6373.0
