@@ -6,6 +6,14 @@ import matplotlib.pyplot as plt
 app = Flask(__name__)
 app.config.from_object('config.Config')
 
+def validate(lat,long):
+    try:
+        if type(lat)==str:lat=float(lat.strip())
+        if type(long)==str:long=float(long.strip())
+        return -90.0<=lat<=90.0 and -180.0<=long<=180.0
+    except:
+        return False
+
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
 app.config['MYSQL_PASSWORD'] = 'Game_server'     #change this password to your MySQL password for root@localhost 
@@ -37,6 +45,9 @@ def Register():
         lastName = request.form['lastName']
         homeLat = request.form['homeLat']
         homeLong = request.form['homeLong']
+        if not validate(homeLat,homeLong):
+            error = "Invalid latitude\longitude"
+            return render_template('register.html',error = error)
 
         #Valid input check
         if(len(email) is 0):
@@ -48,6 +59,8 @@ def Register():
         if (len(firstName) is 0):
             error = 'First Name cannot be empty'
             return render_template('register.html', error = error)
+        
+
         
         #Valid input handling
         cur=mysql.connection.cursor()
@@ -110,6 +123,9 @@ def Index():
             if(arr[0] is 1):
                 currLat=arr[1]
                 currLong=arr[2]
+            if not validate(currLat,currLong):
+                error = "Invalid latitude\longitude"
+                return render_template('index.html',error = error)
         return render_template('index.html', email=email,currLat=currLat,currLong=currLong)
     else:
         return redirect(url_for('Login'))
@@ -122,7 +138,12 @@ def check_location():
     total_users = None
     if email in logged_in_users:
         if request.method == 'POST':
-            arr = find_people(float(request.form['checkLat']),float(request.form['checkLong']),float(request.form['time']))
+            lat1 = float(request.form['checkLat'])
+            lng1 = float(request.form['checkLong'])
+            if not validate(currLat,currLong):
+                error = "Invalid latitude\longitude"
+                return render_template('check.html',error = error)            
+            arr = find_people(lat1,lng1,float(request.form['time']))
             flagged_users = arr[0]
             total_users = arr[1]
         return render_template('check.html', email=email,flagged_users= flagged_users,total_users= total_users)
@@ -143,6 +164,9 @@ def check_trend():
 def change_coordinates_and_check_density(cur, email):
     currLatitude = request.form['currLat']
     currLongitude = request.form['currLong']
+    if not validate(currLatitude,currLongitude):
+                error = "Invalid latitude\longitude"
+                return render_template('index.html',error = error)
     _sql = "select homeLat, homeLong from User_Profile where UserID = '{0}'"
     cur.execute(_sql.format(email))
     stored=cur.fetchall()
