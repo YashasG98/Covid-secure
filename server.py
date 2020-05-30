@@ -7,7 +7,7 @@ app.config.from_object('config.Config')
 
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'Game_server'     #change this password to your MySQL password for root@localhost 
+app.config['MYSQL_PASSWORD'] = 'password'     #change this password to your MySQL password for root@localhost 
 app.config['MYSQL_DB'] = 'Covid_secure'
 
 mysql = MySQL(app)
@@ -99,7 +99,6 @@ def Index():
         _sql = "select lastLat, lastLong from Last_Location where UserID = '{0}'"
         cur.execute(_sql.format(email))
         stored=cur.fetchall()
-        stored1 = stored
         if(len(stored)!=0):
             currLat=stored[0][0]
             currLong=stored[0][1]
@@ -112,11 +111,7 @@ def Index():
             if calculate_dist(stored[0][0],stored[0][1],float(currLatitude), float(currLongitude))>outsideDistThreshold:
                 ts = time.time()
                 timestamp = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
-                if(len(stored1) is 0):
-                    cur.execute("INSERT INTO Last_Location(UserID,lastLat,lastLong,updated_at) VALUES(%s,%s,%s,%s)",(email,float(currLatitude),float(currLongitude),timestamp))
-                else:
-                    cur.execute("update Last_Location set lastLat=%s where UserID=%s",(float(currLatitude),email))
-                    cur.execute("UPDATE Last_Location set lastLong='%s' where UserID=%s",(float(currLongitude),email))
+                cur.execute("INSERT INTO Last_Location(UserID,lastLat,lastLong,updated_at) VALUES(%s,%s,%s,%s)",(email,float(currLatitude),float(currLongitude),timestamp))
                 mysql.connection.commit()
                 cur.close()
                 currLat=currLatitude
