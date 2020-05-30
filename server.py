@@ -1,5 +1,6 @@
 from flask import Flask,render_template,request,redirect, url_for, make_response
 from flask_mysqldb import MySQL
+import math
 
 app = Flask(__name__)
 app.config.from_object('config.Config')
@@ -94,6 +95,28 @@ def Index():
         return render_template('index.html', email=email)
     else:
         return redirect(url_for('Login'))
+
+@app.route('/check.html')
+def check_location():
+    email = request.cookies.get('email')
+    if email in logged_in_users:
+        return render_template('check.html', email=email)
+    else:
+        return redirect(url_for('Login'))
+
+
+def calculate_dist(lat_a,lat_b,long_a,long_b):
+    R = 6373.0
+    lat1 = math.radians(lat_a)
+    lon1 = math.radians(long_a)
+    lat2 = math.radians(lat_b)
+    lon2 = math.radians(long_b)
+    dlon = lon2 - lon1
+    dlat = lat2 - lat1
+    a = math.sin(dlat / 2)**2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon / 2)**2
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+    distance = R * c
+    print(distance)
 
 if __name__ == "__main__":
     app.run()

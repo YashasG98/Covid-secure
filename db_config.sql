@@ -19,3 +19,10 @@ create table Login_Credentials (
 	primary key (UserID),
 	foreign key (UserID) references User_Profile (UserID) on delete cascade on update cascade
 );
+
+create table Last_Location (
+	UserID varchar(32),
+	lastLat float(53),
+	lastLong float(53),
+	foreign key (UserID) references User_Profile (UserID) on delete cascade on update cascade
+);

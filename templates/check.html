@@ -29,19 +29,17 @@
         </div>
     </nav>
     <div style='height: 100vh;' class="jumbotron">
-        <h1 class="display-4">Hello, mate!</h1>
-        <p class="lead">How are you doing today?</p>
-        <hr class="my-4">
-        <p style="margin-bottom: 10vh;">Did you remember to wash your hands?</p>
-        <button style='margin-bottom: 5vh;height: 7vh;width: 50%;margin-left: auto;margin-right: auto;' type="button"
-            class="btn btn-primary btn-lg btn-block"
-            onclick="window.location.href=`{{url_for('check_location')}}`">Check a location for safety</button>
-        <button style='margin-bottom: 5vh;height: 7vh;width: 50%;margin-left: auto;margin-right: auto;' type="button"
-            class="btn btn-danger btn-lg btn-block"
-            onclick="window.location.href=`{{url_for('Home', email=email)}}`">Exit</button>
-        <html>
-
-        </html>
+        <form>
+            <div class="form-group">
+              <label>Latitude</label>
+              <input class="form-control" id="checkLat" placeholder="Enter latitude">
+            </div>
+            <div class="form-group">
+                <label>Longitude</label>
+                <input class="form-control" id="checkLong" placeholder="Enter longitude">
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+          </form>
     </div>
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
         integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
