@@ -1,6 +1,6 @@
-# Multiplayer-Game-Server
+# Covid_Secure
 
-A web app which supports multiplayer gaming.
+A web app to track the population density of places to stay safe .
 
 ### Setting up MySQL 
 ```bash
@@ -23,7 +23,7 @@ pip install -r requirements.txt
 
 ### Running the project
 
-Change your password at line 12 of server.py
+Change your  mysql root password in server.py line 10.
 
 ```bash
 python server.py
