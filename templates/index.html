@@ -21,18 +21,6 @@
         <div class="collapse navbar-collapse" id="navbarText">
             <ul class="navbar-nav mr-auto">
                 <li class="nav-item">
-                    <a class="nav-link" href="{{url_for('MiniGames')}}"><b>Play!</b></a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{url_for('Profile')}}"><b>Profile</b></a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{url_for('Shop')}}"><b>Secret Shop</b></a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{url_for('Leaderboard')}}"><b>Leaderboard</b></a>
-                </li>
-                <li class="nav-item">
                     <a class="nav-link" href="{{url_for('Home', email=email)}}"><b>Logout</b></a>
                 </li>
             </ul>
@@ -45,17 +33,6 @@
         <p class="lead">Welcome to the abode of multiplayer gaming!</p>
         <hr class="my-4">
         <p style="margin-bottom: 10vh;">Are you ready to explore a world of infinite possibilities?</p>
-        <button style="margin-bottom: 5vh;height: 7vh;width: 50%;margin-left: auto;margin-right: auto;" type="button"
-            class="btn btn-success btn-lg btn-block" onclick="window.location='miniGames.html'">Play!</button>
-        <button style="margin-bottom: 5vh;height: 7vh;width: 50%;margin-left: auto;margin-right: auto;" type="button"
-            class="btn btn-info btn-lg btn-block"
-            onclick="window.location.href=`{{ url_for('Profile') }}`">Profile</button>
-        <button style='margin-bottom: 5vh;height: 7vh;width: 50%;margin-left: auto;margin-right: auto;' type="button"
-            class="btn btn-dark btn-lg btn-block" onclick="window.location.href=`{{ url_for('Shop') }}`">Secret
-            Shop</button>
-        <button style='margin-bottom: 5vh;height: 7vh;width: 50%;margin-left: auto;margin-right: auto;' type="button"
-            class="btn btn-info btn-lg btn-block"
-            onclick="window.location.href=`{{ url_for('Leaderboard') }}`">Leaderboard</button>
         <button style='margin-bottom: 5vh;height: 7vh;width: 50%;margin-left: auto;margin-right: auto;' type="button"
             class="btn btn-danger btn-lg btn-block"
             onclick="window.location.href=`{{url_for('Home', email=email)}}`">Exit</button>
