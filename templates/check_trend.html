@@ -29,34 +29,22 @@
         </div>
     </nav>
     <div style='height: 100vh;' class="jumbotron">
-        <h1 class="display-4">Hello, mate!</h1>
-        <p class="lead">How are you doing today?</p>
-        <hr class="my-4">
-        <p style="margin-bottom: 1vh;"><b>Update your current location details below if you haven't before or if it has changed</b></p>
-        <form action="/index.html" method="POST">
+        <form action="/check_trend.html" method="POST">
             <div class="form-group">
-              <label>Latitude</label>
-              <input class="form-control" name='currLat' id="currLat" placeholder="Enter latitude" {%- if currLat -%}value ="{{currLat}}" {% endif %}>
+                <label>Latitude</label>
+                <input class="form-control" name='checkLat' id="checkLat" placeholder="Enter latitude">
             </div>
             <div class="form-group">
                 <label>Longitude</label>
-                <input class="form-control" name='currLong' id="currLong" placeholder="Enter longitude" {%- if currLong -%}value ="{{currLong}}" {% endif %}>
+                <input class="form-control" name='checkLong' id="checkLong" placeholder="Enter longitude">
             </div>
-            <button type="submit" class="btn btn-primary">Update</button>
-          </form>
-        <button style='margin-bottom: 5vh;height: 7vh;width: 50%;margin-left: auto;margin-right: auto;' type="button"
-            class="btn btn-primary btn-lg btn-block"
-            onclick="window.location.href=`{{url_for('check_location')}}`">Check a location for safety</button>
-        <button style='margin-bottom: 5vh;height: 7vh;width: 50%;margin-left: auto;margin-right: auto;' type="button"
-            class="btn btn-success btn-lg btn-block"
-            onclick="window.location.href=`{{url_for('check_trend')}}`">Check population trend in a location</button>
-        <button style='margin-bottom: 5vh;height: 7vh;width: 50%;margin-left: auto;margin-right: auto;' type="button"
-            class="btn btn-danger btn-lg btn-block"
-            onclick="window.location.href=`{{url_for('Home', email=email)}}`">Exit</button>
-        <html>
-
-        </html>
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+        {% if img %}
+            <img src="{{url_for('static', filename='images/trend.png')}}" style="width: 100%;"/>
+        {% endif %}
     </div>
+        
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
         integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
         crossorigin="anonymous"></script>

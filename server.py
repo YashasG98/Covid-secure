@@ -129,6 +129,17 @@ def check_location():
     else:
         return redirect(url_for('Login'))
 
+@app.route('/check_trend.html', methods = ['GET', 'POST'])
+def check_trend():
+    img=None
+    email = request.cookies.get('email')
+    if email in logged_in_users:
+        if request.method == 'POST':
+            img = trend(float(request.form['checkLat']),float(request.form['checkLong']))
+        return render_template('check_trend.html', email=email,img=img)
+    else:
+        return redirect(url_for('Login'))
+
 def change_coordinates_and_check_density(cur, email):
     currLatitude = request.form['currLat']
     currLongitude = request.form['currLong']
@@ -200,28 +211,27 @@ def trend(lat,lng):
     lat=float(lat)
     lng = float(lng)
     cur=mysql.connection.cursor()
-    _sql = "select * from last_location;"
+    _sql = "select * from Last_Location;"
     cur.execute(_sql)
     stored=cur.fetchall()
     if len(stored)==0:
-        print("No users in past 24 hours near this location.")
+        return 0
     else:
         hour_collection = [set() for i in range(24)]
-        for user,lat1,lng1,time in stored:
-            if calculate_dist(lat1,lng1,lat,lng)< Area_considered:
+        for id,user,lat1,lng1,time in stored:
+            if calculate_dist(lat1,lng1,lat,lng)< 10:
                 t=(time-datetime.datetime.now()).seconds
                 if t < 24*3600:
                     hour_collection[t//3600].add(user)
         hour_collection = [len(i) for i in hour_collection]
-        labels = [(datetime.now() - timedelta(hours = i)).strftime('%Y-%m-%d %H:%M:%S') for i in range(24)]
-        import matplotlib.pyplot as plt
         plt.figure(figsize=(20,5))
         labels = [(datetime.datetime.now() - datetime.timedelta(hours = i)).strftime('%H:%M') for i in range(24)]
         plt.plot(range(24),hour_collection)
         plt.ylabel("Number of people")
         plt.xlabel( "Time in past 24 hours")
         plt.xticks(range(24),labels = labels,rotation =0)
-        plt.savefig(".\static\images\abc.jpg")
+        plt.savefig("static/images/trend.png")
+        return 1
 
 def calculate_dist(lat_a,long_a,lat_b,long_b):
     R = 6373.0
