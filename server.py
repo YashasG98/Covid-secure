@@ -1,6 +1,6 @@
 from flask import Flask,render_template,request,redirect, url_for, make_response
 from flask_mysqldb import MySQL
-import math
+import math, time, datetime
 
 app = Flask(__name__)
 app.config.from_object('config.Config')
@@ -11,6 +11,7 @@ app.config['MYSQL_PASSWORD'] = 'Game_server'     #change this password to your M
 app.config['MYSQL_DB'] = 'Covid_secure'
 
 mysql = MySQL(app)
+outsideDistThreshold = 0.5
 
 logged_in_users =[]
 
@@ -88,24 +89,55 @@ def Login():
     return render_template('login.html', error = error)
 
 
-@app.route('/index.html')
+@app.route('/index.html', methods = ['GET', 'POST'])
 def Index():
     email = request.cookies.get('email')
+    currLat=None
+    currLong=None
     if email in logged_in_users:
-        return render_template('index.html', email=email)
+        cur=mysql.connection.cursor()
+        _sql = "select lastLat, lastLong from Last_Location where UserID = '{0}'"
+        cur.execute(_sql.format(email))
+        stored=cur.fetchall()
+        stored1 = stored
+        if(len(stored)!=0):
+            currLat=stored[0][0]
+            currLong=stored[0][1]
+        if request.method == 'POST':
+            currLatitude = request.form['currLat']
+            currLongitude = request.form['currLong']
+            _sql = "select homeLat, homeLong from User_Profile where UserID = '{0}'"
+            cur.execute(_sql.format(email))
+            stored=cur.fetchall()
+            if calculate_dist(stored[0][0],stored[0][1],float(currLatitude), float(currLongitude))>outsideDistThreshold:
+                ts = time.time()
+                timestamp = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
+                if(len(stored1) is 0):
+                    cur.execute("INSERT INTO Last_Location(UserID,lastLat,lastLong,updated_at) VALUES(%s,%s,%s,%s)",(email,float(currLatitude),float(currLongitude),timestamp))
+                else:
+                    cur.execute("update Last_Location set lastLat=%s where UserID=%s",(float(currLatitude),email))
+                    cur.execute("UPDATE Last_Location set lastLong='%s' where UserID=%s",(float(currLongitude),email))
+                mysql.connection.commit()
+                cur.close()
+                currLat=currLatitude
+                currLong=currLongitude
+        return render_template('index.html', email=email,currLat=currLat,currLong=currLong)
     else:
         return redirect(url_for('Login'))
 
 @app.route('/check.html')
 def check_location():
+    check=None
     email = request.cookies.get('email')
     if email in logged_in_users:
+        homeLat = request.form['checkLat']
+        homeLong = request.form['checkLong']
         return render_template('check.html', email=email)
     else:
         return redirect(url_for('Login'))
 
 
-def calculate_dist(lat_a,lat_b,long_a,long_b):
+def calculate_dist(lat_a,long_a,lat_b,long_b):
     R = 6373.0
     lat1 = math.radians(lat_a)
     lon1 = math.radians(long_a)
@@ -116,7 +148,7 @@ def calculate_dist(lat_a,lat_b,long_a,long_b):
     a = math.sin(dlat / 2)**2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon / 2)**2
     c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
     distance = R * c
-    print(distance)
+    return distance
 
 if __name__ == "__main__":
     app.run()

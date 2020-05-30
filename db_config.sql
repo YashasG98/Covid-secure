@@ -24,5 +24,6 @@ create table Last_Location (
 	UserID varchar(32),
 	lastLat float(53),
 	lastLong float(53),
+	updated_at timestamp,
 	foreign key (UserID) references User_Profile (UserID) on delete cascade on update cascade
 );
